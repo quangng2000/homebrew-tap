@@ -1,10 +1,10 @@
-class TransformerLab < Formula
+class RiftcoTransformer < Formula
   desc "Auditable transformer framework with C/C++ APIs and training CLI"
-  homepage "https://github.com/quangng2000/transformer-lab"
-  url "https://github.com/quangng2000/transformer-lab/releases/download/v0.1.0/riftco_transformer-0.1.0.tar.gz"
+  homepage "https://github.com/quangng2000/riftco-transformer"
+  url "https://github.com/quangng2000/riftco-transformer/releases/download/v0.1.0/riftco_transformer-0.1.0.tar.gz"
   sha256 "bc93ca32680183a34c719c1767b6e2f159e1a95e78dadd500477d76b688ad420"
   license "Apache-2.0"
-  head "https://github.com/quangng2000/transformer-lab.git", branch: "main"
+  head "https://github.com/quangng2000/riftco-transformer.git", branch: "main"
 
   depends_on "cmake" => [:build, :test]
 
@@ -28,7 +28,7 @@ class TransformerLab < Formula
         transformer_lab --config /path/to/config.conf
 
       Example configuration:
-      https://github.com/quangng2000/transformer-lab/blob/v#{version}/configs/tiny.conf
+      https://github.com/quangng2000/riftco-transformer/blob/v#{version}/configs/tiny.conf
     EOS
   end
 
