@@ -1,8 +1,8 @@
 class RiftcoTransformer < Formula
   desc "Auditable transformer framework with C/C++ APIs and training CLI"
   homepage "https://github.com/quangng2000/riftco-transformer"
-  url "https://github.com/quangng2000/riftco-transformer/releases/download/v0.1.0/riftco_transformer-0.1.0.tar.gz"
-  sha256 "bc93ca32680183a34c719c1767b6e2f159e1a95e78dadd500477d76b688ad420"
+  url "https://github.com/quangng2000/riftco-transformer/releases/download/v0.2.0/riftco_transformer-0.2.0.tar.gz"
+  sha256 "cd6e964098ba637320c8a6a6a4d42d5dcd60ecf1b8460fc79d047fb4cd7fb453"
   license "Apache-2.0"
   head "https://github.com/quangng2000/riftco-transformer.git", branch: "main"
 
@@ -10,11 +10,11 @@ class RiftcoTransformer < Formula
 
   def install
     args = %W[
-      -DTRANSFORMER_LAB_BUILD_CLI=ON
-      -DTRANSFORMER_LAB_BUILD_PYTHON_WHEEL=OFF
-      -DTRANSFORMER_LAB_BUILD_TESTS=OFF
-      -DTRANSFORMER_LAB_ENABLE_INSTALL=ON
-      -DTRANSFORMER_LAB_ENABLE_METAL=#{OS.mac? ? "ON" : "OFF"}
+      -DRIFTCO_TRANSFORMER_BUILD_CLI=ON
+      -DRIFTCO_TRANSFORMER_BUILD_PYTHON_WHEEL=OFF
+      -DRIFTCO_TRANSFORMER_BUILD_TESTS=OFF
+      -DRIFTCO_TRANSFORMER_ENABLE_INSTALL=ON
+      -DRIFTCO_TRANSFORMER_ENABLE_METAL=#{OS.mac? ? "ON" : "OFF"}
     ]
     system "cmake", "-S", ".", "-B", "build", *args, *std_cmake_args
     system "cmake", "--build", "build"
@@ -25,7 +25,7 @@ class RiftcoTransformer < Formula
     <<~EOS
       The training CLI needs an explicit configuration after installation:
 
-        transformer_lab --config /path/to/config.conf
+        riftco-transformer --config /path/to/config.conf
 
       Example configuration:
       https://github.com/quangng2000/riftco-transformer/blob/v#{version}/configs/tiny.conf
@@ -59,7 +59,7 @@ class RiftcoTransformer < Formula
     EOS
 
     output = shell_output(
-      "#{bin}/transformer_lab --config #{config} --steps 1 " \
+      "#{bin}/riftco-transformer --config #{config} --steps 1 " \
       "--metrics #{metrics} --backend cpu --attention flash " \
       "--activation-checkpointing block",
     )
@@ -72,14 +72,14 @@ class RiftcoTransformer < Formula
     assert_match(/^1,/, metrics.read.lines.fetch(1))
 
     (testpath/"abi_test.c").write <<~C
-      #include "transformer_lab/c_api.h"
+      #include "riftco_transformer/c_api.h"
       #include <stdint.h>
       #include <stdlib.h>
 
       int main(void) {
         int32_t available = 0;
-        if (tl_abi_version() != TL_ABI_VERSION ||
-            tl_backend_is_available(TL_BACKEND_CPU, &available) != TL_STATUS_OK ||
+        if (rt_abi_version() != RT_ABI_VERSION ||
+            rt_backend_is_available(RT_BACKEND_CPU, &available) != RT_STATUS_OK ||
             available == 0) {
           return EXIT_FAILURE;
         }
@@ -88,13 +88,13 @@ class RiftcoTransformer < Formula
     C
     (testpath/"CMakeLists.txt").write <<~CMAKE
       cmake_minimum_required(VERSION 3.24)
-      project(transformer_lab_formula_test LANGUAGES C)
-      find_package(transformer_lab 0.1 CONFIG REQUIRED)
+      project(riftco_transformer_formula_test LANGUAGES C)
+      find_package(riftco_transformer 0.2 CONFIG REQUIRED)
       add_executable(abi_test abi_test.c)
-      target_link_libraries(abi_test PRIVATE transformer_lab::c_api)
+      target_link_libraries(abi_test PRIVATE riftco_transformer::c_api)
     CMAKE
     system "cmake", "-S", ".", "-B", "consumer-build",
-                    "-DCMAKE_PREFIX_PATH=#{prefix}", *std_cmake_args
+           "-DCMAKE_PREFIX_PATH=#{prefix}", *std_cmake_args
     system "cmake", "--build", "consumer-build"
     system testpath/"consumer-build/abi_test"
   end
